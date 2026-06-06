@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NutriFind — Recipe Finder & Nutrition Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles/main.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav" id="main-nav">
+    <div class="nav-inner">
+      <a href="#/" class="nav-logo">
+        <span class="logo-icon">🥗</span>
+        <span class="logo-text">NutriFind</span>
+      </a>
+      <div class="nav-links">
+        <a href="#/" class="nav-link" data-page="search">Search</a>
+        <a href="#/saved" class="nav-link" data-page="saved">Saved</a>
+        <a href="#/today" class="nav-link" data-page="today">Today</a>
+        <a href="#/settings" class="nav-link" data-page="settings">Settings</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- APP -->
+  <main class="app-main" id="app">
+    <div class="loading-screen" id="loading-screen">
+      <div class="loader"></div>
+    </div>
+  </main>
+
+  <!-- BOTTOM NAV (mobile) -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <a href="#/" class="bottom-nav-item" data-page="search">
+      <span class="bottom-nav-icon">🔍</span>
+      <span>Search</span>
+    </a>
+    <a href="#/saved" class="bottom-nav-item" data-page="saved">
+      <span class="bottom-nav-icon">🤍</span>
+      <span>Saved</span>
+    </a>
+    <a href="#/today" class="bottom-nav-item" data-page="today">
+      <span class="bottom-nav-icon">📊</span>
+      <span>Today</span>
+    </a>
+    <a href="#/settings" class="bottom-nav-item" data-page="settings">
+      <span class="bottom-nav-icon">⚙️</span>
+      <span>Settings</span>
+    </a>
+  </nav>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
