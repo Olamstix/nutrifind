@@ -1,5 +1,5 @@
 # NutriFind 🥗
-**Recipe Finder & Nutrition Tracker** — WDD 330 Final Project
+**Recipe Finder & Nutrition Tracker** 
 
 ## Setup Instructions
 
