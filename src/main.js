@@ -4,6 +4,7 @@ import { renderDetail } from './views/detail.js'
 import { renderSaved }  from './views/saved.js'
 import { renderToday }  from './views/today.js'
 import { renderSettings } from './views/settings.js'
+import { renderFridge } from './views/fridge.js'
 import { setActiveNav } from './modules/ui.js'
 
 const app = document.getElementById('app')
@@ -15,6 +16,9 @@ function navigate(view, data = null) {
   currentView = view
   if (data) currentRecipe = data
   render()
+
+  // Move focus to main content for keyboard/screen reader users
+  app.focus()
 }
 
 function render() {
@@ -28,6 +32,9 @@ function render() {
   switch (currentView) {
     case 'search':
       renderSearch(app, navigate)
+      break
+    case 'fridge':
+      renderFridge(app, navigate)
       break
     case 'detail':
       renderDetail(app, currentRecipe, navigate)
@@ -49,10 +56,11 @@ function render() {
 // Hash-based routing
 function handleRoute() {
   const hash = window.location.hash
-  if (hash === '#/saved')    navigate('saved')
+  if (hash === '#/fridge')        navigate('fridge')
+  else if (hash === '#/saved')    navigate('saved')
   else if (hash === '#/today')    navigate('today')
   else if (hash === '#/settings') navigate('settings')
-  else                            navigate('search')
+  else                             navigate('search')
 }
 
 window.addEventListener('hashchange', handleRoute)

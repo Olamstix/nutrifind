@@ -14,12 +14,12 @@ export async function renderDetail(app, recipe, navigate) {
 
   app.innerHTML = `
     <div class="page">
-      <a class="detail-back" id="back-btn">← Back to results</a>
+      <button class="detail-back" id="back-btn" aria-label="Back to search results">← Back to results</button>
       <div class="detail-layout">
         <div class="detail-left">
           ${recipe.image
-            ? `<img class="detail-img" src="${recipe.image}" alt="${recipe.label}">`
-            : `<div class="detail-img-placeholder">🥗</div>`
+            ? `<img class="detail-img" src="${recipe.image}" alt="${recipe.label}" loading="lazy">`
+            : `<div class="detail-img-placeholder" role="img" aria-label="No image available">🥗</div>`
           }
         </div>
         <div class="detail-right">
@@ -30,37 +30,41 @@ export async function renderDetail(app, recipe, navigate) {
             ${recipe.mealType?.length ? ' · ' + recipe.mealType.join(', ') : ''}
           </p>
 
-          <div class="detail-labels">
+          <div class="detail-labels" aria-label="Dietary labels">
             ${recipe.dietLabels.slice(0, 4).map(l =>
               `<span class="detail-label">${l}</span>`
             ).join('')}
           </div>
 
-          <div class="serving-row">
-            <span class="serving-label">Servings:</span>
-            <button class="serving-btn" id="serving-minus">−</button>
-            <span class="serving-count" id="serving-count">${servings}</span>
-            <button class="serving-btn" id="serving-plus">+</button>
+          <div class="serving-row" role="group" aria-label="Adjust servings">
+            <span class="serving-label" id="serving-label">Servings:</span>
+            <button class="serving-btn" id="serving-minus" aria-label="Decrease servings" aria-controls="serving-count">−</button>
+            <span class="serving-count" id="serving-count" aria-live="polite">${servings}</span>
+            <button class="serving-btn" id="serving-plus" aria-label="Increase servings" aria-controls="serving-count">+</button>
           </div>
 
-          <div id="macro-summary" class="macro-summary">
-            <div class="spinner-wrap"><div class="loader"></div></div>
+          <div id="macro-summary" class="macro-summary" aria-live="polite" aria-label="Nutrition summary">
+            <div class="spinner-wrap"><div class="loader" aria-hidden="true"></div><span class="sr-only">Loading nutrition data...</span></div>
           </div>
 
-          <div id="nutrient-section">
+          <div id="nutrient-section" aria-live="polite">
             ${spinner()}
           </div>
 
           <div class="detail-actions">
-            <button class="btn-add-today" id="btn-add-today">+ Add to today</button>
-            <button class="btn-save-detail ${isSaved(recipe.id) ? 'saved' : ''}" id="btn-save">
+            <button class="btn-add-today" id="btn-add-today" aria-label="Add this recipe to today's meal log">+ Add to today</button>
+            <button class="btn-save-detail ${isSaved(recipe.id) ? 'saved' : ''}" id="btn-save"
+              aria-pressed="${isSaved(recipe.id)}">
               ${isSaved(recipe.id) ? '❤️ Saved' : '🤍 Save recipe'}
             </button>
+            <button class="btn-save-detail" id="btn-print" aria-label="Open printable nutrition label">🖨️ Print label</button>
             ${recipe.url ? `<a href="${recipe.url}" target="_blank" rel="noopener" class="btn-save-detail">🔗 View recipe</a>` : ''}
           </div>
         </div>
       </div>
     </div>
+
+    <div id="print-label" class="print-only" aria-hidden="true"></div>
   `
 
   // Back button
@@ -73,13 +77,20 @@ export async function renderDetail(app, recipe, navigate) {
       removeRecipe(recipe.id)
       saveBtn.textContent = '🤍 Save recipe'
       saveBtn.classList.remove('saved')
+      saveBtn.setAttribute('aria-pressed', 'false')
       showToast('Removed from saved')
     } else {
       saveRecipe(recipe)
       saveBtn.textContent = '❤️ Saved'
       saveBtn.classList.add('saved')
+      saveBtn.setAttribute('aria-pressed', 'true')
       showToast('Recipe saved!')
     }
+  })
+
+  // Print nutrition label button
+  app.querySelector('#btn-print').addEventListener('click', () => {
+    printNutritionLabel(recipe, servings, nutritionData)
   })
 
   // Add to today button
@@ -249,4 +260,95 @@ function renderNutritionFallback(app, recipe) {
       ⚠️ Detailed nutrition unavailable — showing basic data from recipe search.
     </p>
   `
+}
+
+/**
+ * Builds a print-optimized nutrition facts label and opens the browser
+ * print dialog. Uses live nutritionData if available, otherwise falls
+ * back to the basic macros from the recipe search result.
+ */
+function printNutritionLabel(recipe, servings, nutritionData) {
+  let rows = []
+
+  if (nutritionData) {
+    const n = nutritionData.totalNutrients
+    const yld = nutritionData.yield || 1
+    const per = (key) => n[key] ? Math.round((n[key].quantity / yld) * servings * 10) / 10 : 0
+
+    rows = [
+      ['Calories', Math.round((nutritionData.calories / yld) * servings), ''],
+      ['Total Fat', per('FAT'), 'g'],
+      ['  Saturated Fat', per('FASAT'), 'g'],
+      ['Cholesterol', per('CHOLE'), 'mg'],
+      ['Sodium', per('NA'), 'mg'],
+      ['Total Carbohydrate', per('CHOCDF'), 'g'],
+      ['  Dietary Fiber', per('FIBTG'), 'g'],
+      ['  Sugars', per('SUGAR'), 'g'],
+      ['Protein', per('PROCNT'), 'g'],
+      ['Vitamin C', per('VITC'), 'mg'],
+      ['Calcium', per('CA'), 'mg'],
+      ['Iron', per('FE'), 'mg'],
+      ['Potassium', per('K'), 'mg'],
+    ]
+  } else {
+    const m = recipe.macros
+    rows = [
+      ['Calories', recipe.caloriesPerServing * servings, ''],
+      ['Total Fat', (m.fat || 0) * servings, 'g'],
+      ['Total Carbohydrate', (m.carbs || 0) * servings, 'g'],
+      ['  Dietary Fiber', (m.fiber || 0) * servings, 'g'],
+      ['Protein', (m.protein || 0) * servings, 'g'],
+    ]
+  }
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <title>Nutrition Facts — ${recipe.label}</title>
+      <style>
+        body { font-family: Helvetica, Arial, sans-serif; padding: 24px; color: #000; }
+        .label-box { max-width: 320px; border: 2px solid #000; padding: 12px; }
+        h1 { font-size: 22px; border-bottom: 8px solid #000; padding-bottom: 6px; margin: 0 0 6px; }
+        .recipe-name { font-size: 14px; font-weight: bold; margin-bottom: 8px; }
+        .servings { font-size: 12px; border-bottom: 1px solid #000; padding-bottom: 6px; margin-bottom: 6px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        td { padding: 3px 0; border-bottom: 1px solid #ccc; }
+        td:last-child { text-align: right; font-weight: bold; }
+        tr.indent td:first-child { padding-left: 16px; font-weight: normal; }
+        tr.bold td { font-weight: bold; border-bottom: 4px solid #000; }
+        .footer-note { font-size: 10px; margin-top: 10px; color: #555; }
+        @media print {
+          body { padding: 0; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="label-box">
+        <h1>Nutrition Facts</h1>
+        <div class="recipe-name">${recipe.label}</div>
+        <div class="servings">Servings: ${servings} · Source: ${recipe.source}</div>
+        <table>
+          ${rows.map(([label, val, unit], i) => `
+            <tr class="${label.startsWith('  ') ? 'indent' : ''} ${i === 0 ? 'bold' : ''}">
+              <td>${label.trim()}</td>
+              <td>${val}${unit}</td>
+            </tr>
+          `).join('')}
+        </table>
+        <div class="footer-note">
+          Generated by NutriFind · Values are estimates based on ${servings} serving${servings > 1 ? 's' : ''}.
+          % Daily Values vary by individual needs.
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+
+  const printWindow = window.open('', '_blank')
+  printWindow.document.write(html)
+  printWindow.document.close()
+  printWindow.focus()
+  printWindow.print()
 }

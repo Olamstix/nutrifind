@@ -11,15 +11,19 @@
 </head>
 <body>
 
+  <!-- Skip link for keyboard/screen reader users -->
+  <a href="#app" class="skip-link">Skip to main content</a>
+
   <!-- NAV -->
-  <nav class="nav" id="main-nav">
+  <nav class="nav" id="main-nav" aria-label="Main navigation">
     <div class="nav-inner">
-      <a href="#/" class="nav-logo">
-        <span class="logo-icon">🥗</span>
+      <a href="#/" class="nav-logo" aria-label="NutriFind home">
+        <span class="logo-icon" aria-hidden="true">🥗</span>
         <span class="logo-text">NutriFind</span>
       </a>
       <div class="nav-links">
         <a href="#/" class="nav-link" data-page="search">Search</a>
+        <a href="#/fridge" class="nav-link" data-page="fridge">Fridge</a>
         <a href="#/saved" class="nav-link" data-page="saved">Saved</a>
         <a href="#/today" class="nav-link" data-page="today">Today</a>
         <a href="#/settings" class="nav-link" data-page="settings">Settings</a>
@@ -28,31 +32,39 @@
   </nav>
 
   <!-- APP -->
-  <main class="app-main" id="app">
-    <div class="loading-screen" id="loading-screen">
-      <div class="loader"></div>
+  <main class="app-main" id="app" tabindex="-1">
+    <div class="loading-screen" id="loading-screen" role="status" aria-live="polite">
+      <div class="loader" aria-hidden="true"></div>
+      <span class="sr-only">Loading NutriFind...</span>
     </div>
   </main>
 
   <!-- BOTTOM NAV (mobile) -->
-  <nav class="bottom-nav" id="bottom-nav">
+  <nav class="bottom-nav" id="bottom-nav" aria-label="Mobile navigation">
     <a href="#/" class="bottom-nav-item" data-page="search">
-      <span class="bottom-nav-icon">🔍</span>
+      <span class="bottom-nav-icon" aria-hidden="true">🔍</span>
       <span>Search</span>
     </a>
+    <a href="#/fridge" class="bottom-nav-item" data-page="fridge">
+      <span class="bottom-nav-icon" aria-hidden="true">🥕</span>
+      <span>Fridge</span>
+    </a>
     <a href="#/saved" class="bottom-nav-item" data-page="saved">
-      <span class="bottom-nav-icon">🤍</span>
+      <span class="bottom-nav-icon" aria-hidden="true">🤍</span>
       <span>Saved</span>
     </a>
     <a href="#/today" class="bottom-nav-item" data-page="today">
-      <span class="bottom-nav-icon">📊</span>
+      <span class="bottom-nav-icon" aria-hidden="true">📊</span>
       <span>Today</span>
     </a>
     <a href="#/settings" class="bottom-nav-item" data-page="settings">
-      <span class="bottom-nav-icon">⚙️</span>
+      <span class="bottom-nav-icon" aria-hidden="true">⚙️</span>
       <span>Settings</span>
     </a>
   </nav>
+
+  <!-- Live region for toast announcements -->
+  <div id="toast-live" class="sr-only" role="status" aria-live="polite"></div>
 
   <script type="module" src="/src/main.js"></script>
 </body>

@@ -1,17 +1,25 @@
 // ui.js — shared UI utilities
 
-/** Show a toast notification */
+/** Show a toast notification, also announced to screen readers */
 export function showToast(message) {
   let toast = document.getElementById('toast')
   if (!toast) {
     toast = document.createElement('div')
     toast.id = 'toast'
     toast.className = 'toast'
+    toast.setAttribute('aria-hidden', 'true')
     document.body.appendChild(toast)
   }
   toast.textContent = message
   toast.classList.add('show')
   setTimeout(() => toast.classList.remove('show'), 2500)
+
+  // Announce to screen readers via the dedicated live region
+  const live = document.getElementById('toast-live')
+  if (live) {
+    live.textContent = ''
+    requestAnimationFrame(() => { live.textContent = message })
+  }
 }
 
 /** Render a spinner */

@@ -12,10 +12,10 @@ export function createRecipeCard(recipe, onView) {
   card.innerHTML = `
     ${recipe.image
       ? `<img class="recipe-card-img" src="${recipe.image}" alt="${recipe.label}" loading="lazy">`
-      : `<div class="recipe-card-img-placeholder">🥗</div>`
+      : `<div class="recipe-card-img-placeholder" role="img" aria-label="No image available">🥗</div>`
     }
     <div class="recipe-card-body">
-      <div class="recipe-card-title">${recipe.label}</div>
+      <h3 class="recipe-card-title">${recipe.label}</h3>
       <div class="recipe-card-source">${recipe.source}</div>
       <div class="recipe-card-kcal">${recipe.caloriesPerServing} kcal / serving</div>
       <div class="recipe-card-macros">
@@ -24,8 +24,10 @@ export function createRecipeCard(recipe, onView) {
         <span class="macro-pill"><strong>${recipe.macros.fat}g</strong> fat</span>
       </div>
       <div class="recipe-card-footer">
-        <button class="btn-view">View nutrition →</button>
-        <button class="btn-save ${saved ? 'saved' : ''}" title="${saved ? 'Unsave' : 'Save recipe'}">
+        <button class="btn-view" aria-label="View nutrition details for ${recipe.label}">View nutrition →</button>
+        <button class="btn-save ${saved ? 'saved' : ''}"
+          aria-pressed="${saved}"
+          aria-label="${saved ? `Remove ${recipe.label} from saved recipes` : `Save ${recipe.label}`}">
           ${saved ? '❤️' : '🤍'}
         </button>
       </div>
@@ -43,11 +45,15 @@ export function createRecipeCard(recipe, onView) {
       removeRecipe(recipe.id)
       saveBtn.textContent = '🤍'
       saveBtn.classList.remove('saved')
+      saveBtn.setAttribute('aria-pressed', 'false')
+      saveBtn.setAttribute('aria-label', `Save ${recipe.label}`)
       showToast('Removed from saved recipes')
     } else {
       saveRecipe(recipe)
       saveBtn.textContent = '❤️'
       saveBtn.classList.add('saved')
+      saveBtn.setAttribute('aria-pressed', 'true')
+      saveBtn.setAttribute('aria-label', `Remove ${recipe.label} from saved recipes`)
       showToast('Recipe saved!')
     }
   })
